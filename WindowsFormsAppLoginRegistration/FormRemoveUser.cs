@@ -14,15 +14,26 @@ namespace WindowsFormsAppLoginRegistration
     public partial class FormRemoveUser : Form
     {
         private FormAdmin FormAdmin { get; set; }
+        private DataAccess Da { get; set; }
         public FormRemoveUser()
         {
             InitializeComponent();
+            this.Da = new DataAccess();
+
+            this.PopulateGridView();
         }
         public FormRemoveUser(FormAdmin formAdmin) : this()
         {
             this.FormAdmin = formAdmin;
         }
 
+        private void PopulateGridView()
+        {
+            string query = "select * from UserInformation";
+            var ds = this.Da.ExecuteQuery(query);
+
+            this.userGrid.DataSource = ds.Tables[0];
+        }
         private void FormRemoveUser_FormClosed(object sender, FormClosedEventArgs e)
         {
             this.Hide();
@@ -63,17 +74,20 @@ namespace WindowsFormsAppLoginRegistration
                 return false;
             }
         }
-        public void RemoveUser(string username)
+        public void RemoveUser()
         {
             try
             {
-                SqlConnection sqlcon = new SqlConnection(@"Data Source=DESKTOP-A7UFOMU\SQLEXPRESS;Initial Catalog=LoginDatabase;Persist Security Info=True;User ID=sa;Password=tahsin1122");
+                /*SqlConnection sqlcon = new SqlConnection(@"Data Source=DESKTOP-A7UFOMU\SQLEXPRESS;Initial Catalog=LoginDatabase;Persist Security Info=True;User ID=sa;Password=tahsin1122");
                 sqlcon.Open();
                 string query = "delete from UserInformation where UserName=@UserName;";
                 SqlCommand sqlCommand = new SqlCommand(query, sqlcon);
                 sqlCommand.Parameters.AddWithValue("@UserName", username);
                 sqlCommand.ExecuteNonQuery();
                 sqlcon.Close();
+                */
+                var sql = "delete from UserInformation where UserName='"+this.txtUsername.Text+"';";
+                this.Da.ExecuteQuery(sql);
             }
             catch
             {
@@ -85,13 +99,19 @@ namespace WindowsFormsAppLoginRegistration
         {
             if(this.IsExist())
             {
-                this.RemoveUser(this.txtUsername.Text);
+                this.RemoveUser();
                 MessageBox.Show("User Removed");
+                this.PopulateGridView();
 
             }
             else
                 MessageBox.Show("No user found");
 
+        }
+
+        private void FormRemoveUser_Load(object sender, EventArgs e)
+        {
+            this.userGrid.AutoGenerateColumns=false;
         }
     }
 }
